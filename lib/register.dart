@@ -35,6 +35,7 @@ class RegisterFormState extends State<RegisterForm> {
   String _labelText = '日付を選択してください';
   String _notification = 'なし';
   String name = '';
+  String noImageFilePath = '';
   String imageUrl = '';
 
   Future<void> _selectDate(BuildContext context) async {
@@ -63,11 +64,23 @@ class RegisterFormState extends State<RegisterForm> {
     try {
       // String型のcodeにBarcodeScanner.scan()の結果を代入
       // await：非同期対応の要素のキーワード
-      String code = await BarcodeScanner.scan();
+      // String code = await BarcodeScanner.scan();
+      String code = '4530503891875';
       // readDataに読み取ったデータを格納する
-      var response = await http.get('https://shopping.yahooapis.jp/ShoppingWebService/V3/itemSearch?appid=dj00aiZpPVB2QnJOTm94V1ZRSSZzPWNvbnN1bWVyc2VjcmV0Jng9M2U-&jan_code=$code');
-      setState(() => this.nameEditingController.text = json.decode(response.body)['hits'][0]['name']);
-      setState(() => this.imageUrl = json.decode(response.body)['hits'][0]['image']['medium']);
+      var response = await http.get(
+          'https://shopping.yahooapis.jp/ShoppingWebService/V3/itemSearch?appid=dj00aiZpPVB2QnJOTm94V1ZRSSZzPWNvbnN1bWVyc2VjcmV0Jng9M2U-&jan_code=$code');
+      var responseBody = json.decode(response.body);
+      if (responseBody['totalResultsAvailable'] == 0) {
+        setState(() => this.nameEditingController.text = '見つかりませんでした。');
+        setState(() => this.imageUrl = '');
+        setState(() => this.noImageFilePath = 'images/no_image.png');
+      } else {
+        setState(() =>
+            this.nameEditingController.text = responseBody['hits'][0]['name']);
+        setState(
+            () => this.imageUrl = responseBody['hits'][0]['image']['medium']);
+        setState(() => this.noImageFilePath = '');
+      }
     }
     // 例外処理：プラグインが何らかのエラーを出したとき
     on PlatformException catch (e) {
@@ -252,9 +265,15 @@ class RegisterFormState extends State<RegisterForm> {
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      Image.network(
-                        '$imageUrl',
-                      ),
+                      if (imageUrl != '')
+                        Image.network(
+                          '$imageUrl',
+                        )
+                      else if (noImageFilePath != '')
+                        SizedBox(
+                          width: 200,
+                          child: Image.asset(noImageFilePath),
+                        ),
                     ],
                   ),
                 ],
@@ -266,12 +285,7 @@ class RegisterFormState extends State<RegisterForm> {
             children: <Widget>[
               Center(
                 child: RaisedButton(
-                  onPressed: () {
-                    if (_formKey.currentState.validate()) {
-                      Scaffold.of(context).showSnackBar(
-                          SnackBar(content: Text(textEditingController.text)));
-                    }
-                  },
+                  onPressed: () {},
                   child: Text('登録する'),
                 ),
               ),
