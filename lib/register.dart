@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import "package:intl/intl.dart";
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 
 class Register extends StatelessWidget {
   @override
@@ -27,14 +30,15 @@ class RegisterForm extends StatefulWidget {
 
 class RegisterFormState extends State<RegisterForm> {
   final _formKey = GlobalKey<FormState>();
-  final textEditingController = TextEditingController();
+  final nameEditingController = TextEditingController();
 
   String _labelText = '日付を選択してください';
   String _notification = 'なし';
-  String readData = "";
+  String name = '';
+  String imageUrl = '';
 
   Future<void> _selectDate(BuildContext context) async {
-    initializeDateFormatting("ja_JP");
+    initializeDateFormatting('ja_JP');
     final DateTime selectedDate = await showDatePicker(
         context: context,
         initialDate: DateTime.now(),
@@ -43,7 +47,7 @@ class RegisterFormState extends State<RegisterForm> {
         locale: const Locale('ja'));
 
     if (selectedDate != null) {
-      var formatter = new DateFormat('yyyy/MM/dd(E)', "ja_JP");
+      var formatter = new DateFormat('yyyy/MM/dd(E)', 'ja_JP');
       setState(() {
         _labelText = formatter.format(selectedDate);
       });
@@ -61,7 +65,9 @@ class RegisterFormState extends State<RegisterForm> {
       // await：非同期対応の要素のキーワード
       String code = await BarcodeScanner.scan();
       // readDataに読み取ったデータを格納する
-      setState(() => this.readData = code);
+      var response = await http.get('https://shopping.yahooapis.jp/ShoppingWebService/V3/itemSearch?appid=dj00aiZpPVB2QnJOTm94V1ZRSSZzPWNvbnN1bWVyc2VjcmV0Jng9M2U-&jan_code=$code');
+      setState(() => this.nameEditingController.text = json.decode(response.body)['hits'][0]['name']);
+      setState(() => this.imageUrl = json.decode(response.body)['hits'][0]['image']['medium']);
     }
     // 例外処理：プラグインが何らかのエラーを出したとき
     on PlatformException catch (e) {
@@ -70,19 +76,19 @@ class RegisterFormState extends State<RegisterForm> {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
         setState(() {
           // readDataにエラー内容を代入
-          this.readData = 'カメラのパーミッションが有効になっていません。';
+          this.name = 'カメラのパーミッションが有効になっていません。';
         });
       }
       // その他の場合は不明のエラー
       else {
-        setState(() => this.readData = '原因不明のエラー: $e');
+        setState(() => this.name = '原因不明のエラー: $e');
       }
     }
     // 意図しない入力、操作を受けたとき
     on FormatException {
-      setState(() => this.readData = '読み取れませんでした (スキャンを開始する前に戻るボタンを使用しました)');
+      setState(() => this.name = '読み取れませんでした (スキャンを開始する前に戻るボタンを使用しました)');
     } catch (e) {
-      setState(() => this.readData = '不明なエラー: $e');
+      setState(() => this.name = '不明なエラー: $e');
     }
   }
 
@@ -191,12 +197,67 @@ class RegisterFormState extends State<RegisterForm> {
             ],
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Expanded(
-                child: Text(
-                  '$readData',
-                ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Container(
+                    margin: const EdgeInsets.all(16.0),
+                    child: Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Text(
+                        '名前：',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      SizedBox(
+                        width: 200,
+                        child: TextField(
+                          controller: nameEditingController,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Row(
+            children: <Widget>[
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Container(
+                    margin: const EdgeInsets.all(16.0),
+                    child: Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Text(
+                        '画像：',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Image.network(
+                        '$imageUrl',
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
