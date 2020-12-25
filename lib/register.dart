@@ -64,8 +64,8 @@ class RegisterFormState extends State<RegisterForm> {
     try {
       // String型のcodeにBarcodeScanner.scan()の結果を代入
       // await：非同期対応の要素のキーワード
-      // String code = await BarcodeScanner.scan();
-      String code = '4530503891875';
+      String code = await BarcodeScanner.scan();
+      // String code = '4530503891875';
       // readDataに読み取ったデータを格納する
       var response = await http.get(
           'https://shopping.yahooapis.jp/ShoppingWebService/V3/itemSearch?appid=dj00aiZpPVB2QnJOTm94V1ZRSSZzPWNvbnN1bWVyc2VjcmV0Jng9M2U-&jan_code=$code');
@@ -143,50 +143,6 @@ class RegisterFormState extends State<RegisterForm> {
                       ),
                       onTap: () => _selectDate(context),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Row(
-            children: <Widget>[
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Container(
-                    margin: const EdgeInsets.all(16.0),
-                    child: Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: Text(
-                        '通知：',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Radio(
-                        activeColor: Colors.blueAccent,
-                        value: 'なし',
-                        groupValue: _notification,
-                        onChanged: _changeNotification,
-                      ),
-                      Text('なし'),
-                      Radio(
-                        activeColor: Colors.blueAccent,
-                        value: 'あり',
-                        groupValue: _notification,
-                        onChanged: _changeNotification,
-                      ),
-                      Text('あり'),
-                    ],
                   ),
                 ],
               ),
@@ -274,6 +230,50 @@ class RegisterFormState extends State<RegisterForm> {
                           width: 200,
                           child: Image.asset(noImageFilePath),
                         ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Row(
+            children: <Widget>[
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Container(
+                    margin: const EdgeInsets.all(16.0),
+                    child: Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Text(
+                        '通知：',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Radio(
+                        activeColor: Colors.blueAccent,
+                        value: 'なし',
+                        groupValue: _notification,
+                        onChanged: _changeNotification,
+                      ),
+                      Text('なし'),
+                      Radio(
+                        activeColor: Colors.blueAccent,
+                        value: 'あり',
+                        groupValue: _notification,
+                        onChanged: _changeNotification,
+                      ),
+                      Text('あり'),
                     ],
                   ),
                 ],
