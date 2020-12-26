@@ -12,6 +12,7 @@ class Register extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
       appBar: AppBar(
         title: Text("新規登録"),
         backgroundColor: Colors.black87,
