@@ -32,6 +32,8 @@ dependencies:
   cupertino_icons: ^1.0.0
   barcode_scan: ^0.0.3
   http: ^0.12.0+2
+  sqflite:
+  path:
 
 dev_dependencies:
   flutter_test:
